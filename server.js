@@ -27,6 +27,7 @@ app.post('/extract-styles', async (req, res) => {
       const input = get('input[type="text"], input[type="email"], input')
       const label = get('label')
       const section = get('section, .section, [class*="section"]')
+      const heading = get('h1, h2')
       return {
         bgColor: body?.backgroundColor,
         textColor: body?.color,
