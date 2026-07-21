@@ -16,8 +16,8 @@ app.post('/extract-styles', async (req, res) => {
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     })
     const page = await browser.newPage()
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 })
-    await new Promise(r => setTimeout(r, 3000))
+    await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 })
+    await new Promise(r => setTimeout(r, 5000))
     const tokens = await page.evaluate(() => {
       const get = (sel) => {
         const el = document.querySelector(sel)
