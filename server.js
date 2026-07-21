@@ -1563,54 +1563,6 @@ function defaultTokens() {
     }
   }
 }
-// ... rest of your code ...
-app.post('/debug-scrape', async (req, res) => {
-  const { url } = req.body || {}
-  const fullUrl = url.startsWith('http') ? url : `https://${url}`
-  const { chromium } = require('playwright')
-
-  const browser = await chromium.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-  })
-
-  try {
-    const context = await browser.newContext({
-      viewport: { width: 1440, height: 1000 },
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
-    })
-    const page = await context.newPage()
-    await page.goto(fullUrl, { waitUntil: 'domcontentloaded', timeout: 20000 })
-    await page.waitForTimeout(2000)
-
-    const debug = await page.evaluate(() => {
-      const bodyInline = document.body.getAttribute('style')
-      const dynamicStyles = Array.from(document.querySelectorAll('style'))
-        .map(s => s.textContent)
-        .filter(t => t.includes('elementor-kit') || t.includes('background'))
-        .map(t => t.slice(0, 500))
-      const kitEl = document.querySelector('.elementor-kit-3')
-      const kitComputed = kitEl ? getComputedStyle(kitEl).backgroundColor : null
-      const purpleEls = Array.from(document.querySelectorAll('*'))
-        .filter(el => {
-          const bg = getComputedStyle(el).backgroundColor
-          return bg && bg.includes('rgb(') && !bg.includes('255, 255, 255') && !bg.includes('0, 0, 0')
-        })
-        .slice(0, 5)
-        .map(el => ({
-          tag: el.tagName,
-          class: el.className.slice(0, 80),
-          bg: getComputedStyle(el).backgroundColor
-        }))
-      return { bodyInline, dynamicStyles, kitComputed, purpleEls }
-    })
-
-    res.json(debug)
-  } finally {
-    await browser.close()
-  }
-})
-
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })
 })
