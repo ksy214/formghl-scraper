@@ -71,7 +71,7 @@ app.post('/extract-styles', async (req, res) => {
 
       const tokens = await Promise.race([
         extractViaBrowser(fullUrl),
-        timeoutAfter(20000, 'Playwright extraction timeout')
+        timeoutAfter(45000, 'Playwright extraction timeout')
       ])
 
       if (tokens && isUsablePlaywrightTheme(tokens)) {
@@ -966,20 +966,48 @@ async function extractViaBrowser(url) {
 
   const browser = await chromium.launch({
     headless: true,
-    args: ['--disable-dev-shm-usage']
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-blink-features=AutomationControlled'
+    ]
   })
 
   try {
-    const page = await browser.newPage({
-      viewport: { width: 1440, height: 1000 }
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 1000 },
+      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+      javaScriptEnabled: true,
+      ignoreHTTPSErrors: true
     })
+
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined })
+      window.chrome = { runtime: {} }
+    })
+
+    const page = await context.newPage()
 
     await page.goto(url, {
-      waitUntil: 'domcontentloaded',
-      timeout: 12000
+      waitUntil: 'networkidle',
+      timeout: 30000
     })
 
-    await page.waitForTimeout(1000)
+    // Wait for Elementor frontend to initialise if present
+    await page.evaluate(() => {
+      return new Promise((resolve) => {
+        if (!document.querySelector('[class*="elementor"]')) return resolve()
+        if (window.elementorFrontend?.isInit) return resolve()
+        const timeout = setTimeout(resolve, 8000)
+        document.addEventListener('elementor/frontend/init', () => {
+          clearTimeout(timeout)
+          resolve()
+        })
+      })
+    }).catch(() => null)
+
+    await page.waitForTimeout(2000)
 
     return await page.evaluate(extractComputedTokens)
   } finally {
