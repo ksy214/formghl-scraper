@@ -13,8 +13,8 @@ app.post('/extract-styles', async (req, res) => {
   try {
     browser = await chromium.launch({ headless: true })
     const page = await browser.newPage()
-    await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 })
-    await new Promise(r => setTimeout(r, 3000))
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 })
+    await new Promise(r => setTimeout(r, 2000))
     const tokens = await page.evaluate(() => {
       const get = (sel) => { const el = document.querySelector(sel); return el ? getComputedStyle(el) : null }
       const body = get('body')
