@@ -27,7 +27,19 @@ app.post('/extract-styles', async (req, res) => {
       const btn = get('a.btn, .btn, button, a[class*="button"], .elementor-button')
       const input = get('input[type="text"], input[type="email"], input')
       const label = get('label')
-      const section = get('section, .section, [class*="section"]')
+      const bgCandidates = ['.elementor-top-section','.elementor-section','[class*="hero"]','[class*="banner"]','header','section','.section','[class*="section"]']
+      let sectionEl = null
+      for (const sel of bgCandidates) {
+        const el = document.querySelector(sel)
+        if (el) {
+          const bg = getComputedStyle(el).backgroundColor
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            sectionEl = el
+            break
+          }
+        }
+      }
+      const section = sectionEl ? getComputedStyle(sectionEl) : null
       const heading = get('h1, h2')
       return {
         bgColor: body?.backgroundColor,
