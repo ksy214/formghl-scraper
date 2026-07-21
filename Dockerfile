@@ -15,14 +15,27 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     libgbm1 \
     libasound2 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libfontconfig1 \
+    fontconfig \
+    fonts-liberation \
+    fonts-noto-color-emoji \
     --no-install-recommends \
+    && fc-cache -f -v \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
 COPY package*.json ./
-RUN npm install
+
+RUN npm ci
 RUN npx playwright install chromium
+
 COPY . .
 
+ENV NODE_ENV=production
+
 EXPOSE 3000
+
 CMD ["node", "server.js"]
