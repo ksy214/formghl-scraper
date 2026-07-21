@@ -1,13 +1,21 @@
 {
-  "name": "formghl-scraper",
+  "name": "formatch",
   "version": "1.0.0",
+  "description": "Website style token extractor with CSS parsing and Playwright fallback",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js",
+    "scrape": "node scrape.js",
+    "test": "node --check server.js && node --check scrape.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
   "dependencies": {
-    "express": "^4.18.2",
-    "playwright": "^1.40.0",
-    "cors": "^2.8.5"
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "playwright": "^1.61.1"
   }
 }
