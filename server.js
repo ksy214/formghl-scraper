@@ -1,5 +1,5 @@
 const express = require('express')
-const puppeteer = require('puppeteer')
+const { chromium } = require('playwright')
 const cors = require('cors')
 
 const app = express()
@@ -11,7 +11,7 @@ app.post('/extract-styles', async (req, res) => {
   if (!url) return res.status(400).json({ error: 'URL required' })
   let browser
   try {
-    browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] })
+    browser = await chromium.launch({ headless: true })
     const page = await browser.newPage()
     await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 })
     await new Promise(r => setTimeout(r, 3000))
