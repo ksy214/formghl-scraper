@@ -29,9 +29,19 @@ app.post('/extract-styles', async (req, res) => {
       }
 
       const tokens = await Promise.race([
-        extractViaBrowser(fullUrl),
-        timeoutAfter(20000, 'Playwright extraction timeout')
-      ])
+      extractViaBrowser(fullUrl),
+      timeoutAfter(20000, 'Playwright extraction timeout')
+    ])
+
+    console.log(
+      '[playwright] tokens:',
+      JSON.stringify(tokens, null, 2)
+    )
+    
+    console.log(
+      '[playwright] usable:',
+      isUsablePlaywrightTheme(tokens)
+    )
 
       if (tokens && isUsablePlaywrightTheme(tokens)) {
         return res.json({
@@ -43,7 +53,11 @@ app.post('/extract-styles', async (req, res) => {
 
       console.log('[playwright] Result was not usable; trying CSS fallback')
     } catch (error) {
-      console.log('[playwright] Extraction failed:', error.message)
+        console.error('[playwright] Extraction failed:', error)
+
+        if (error.stack) {
+          console.error(error.stack)
+        }
     }
   } else if (IS_DEVELOPMENT) {
     console.log('[test] Playwright extraction intentionally skipped')
