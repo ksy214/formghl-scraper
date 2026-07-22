@@ -1323,12 +1323,8 @@ function extractComputedTokens() {
       ))
 
       for (const el of sections) {
-        const rect = el.getBoundingClientRect()
-        if (rect.width < window.innerWidth * 0.8 || rect.height < 200) continue
-
         const bg = getComputedStyle(el).backgroundColor
         if (!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') continue
-
         const match = bg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/)
         if (!match) continue
         const [r, g, b] = [Number(match[1]), Number(match[2]), Number(match[3])]
